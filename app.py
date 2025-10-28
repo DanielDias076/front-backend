@@ -28,15 +28,22 @@ def home():
 
 @app.route('/produtos', methods=['GET'])
 def listar():
+    termo = request.args.get('q', '').strip()
     con = conectar()
     cur = con.cursor()
-    cur.execute("SELECT * FROM produtos")
+
+    if termo:
+        cur.execute("SELECT * FROM produtos WHERE nome LIKE ?", (f"%{termo}%",))
+    else:
+        cur.execute("SELECT * FROM produtos")
+
     produtos = [
         {"id": r[0], "nome": r[1], "preco": r[2], "descricao": r[3], "imagem": r[4]}
         for r in cur.fetchall()
     ]
     con.close()
     return jsonify(produtos)
+
 
 @app.route('/produtos', methods=['POST'])
 def adicionar():
